@@ -3,10 +3,15 @@
 import pygame
 import sys
 import math
+import random
+
 
 pygame.init()
 clock = pygame.time.Clock()
 
+MyRandomNumber = random.randrange(1, 1024)
+CongratFlag = False
+Score = 0
 WINDOWSIZE = (576, 125)
 screen = pygame.display.set_mode(WINDOWSIZE)
 pygame.display.set_caption("Binary Counting")
@@ -41,12 +46,17 @@ class SwitchPlate(pygame.sprite.Sprite):
         else:
             self.state = 1
 
+
+def TurnAllSwitchPlatesOff(plates):
+    for p in plates:
+        p.state = 0
+
 def GetBits(plates):
     sum = 0
     for p in plates:
         if p.state > 0:
             sum += (p.BitNumber * p.state)
-    return str(sum)
+    return sum
 
 SwitchPlate.groups = SwitchPlates
 
@@ -79,7 +89,9 @@ while True:
             for sp in SwitchPlates:
                 myMouse = pygame.mouse.get_pos()
                 if sp.rect.collidepoint(myMouse[0], myMouse[1]):
+                    CongratFlag = False
                     sp.click()
+
 
         if event.type == pygame.KEYDOWN:
             pressedkeys = pygame.key.get_pressed()
@@ -90,12 +102,27 @@ while True:
     screen.blit(background, (0, 0))
 
     # Render Text
-    label = font.render(GetBits(SwitchPlates), 1, (255,255,0))
+    CurrentBinarySum = str(GetBits(SwitchPlates))
+    TextBinarySum = font.render(CurrentBinarySum, 1, (255,255,0))
+    if CongratFlag != True:
+        if int(CurrentBinarySum) > MyRandomNumber:
+            TextHint = font.render("Too High.", 1, (255,255,0))
+        elif int(CurrentBinarySum) < MyRandomNumber:
+            TextHint = font.render("Too Low.", 1, (255,255,0))
+        elif int(CurrentBinarySum) == MyRandomNumber:
+            TextHint = font.render("You Win!", 1, (255,255,0))
+            MyRandomNumber = random.randrange(1, 1024)
+            TurnAllSwitchPlatesOff(SwitchPlates)
+            Score += 1
+            CongratFlag = True
+
 
     #Switchplates
     SwitchPlates.update()
-
+    TextScore = font.render("Score: " + str(Score), 1, (255,255,0))
     #Image transfer
-    screen.blit(label, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
+    screen.blit(TextBinarySum, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
+    screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
+    screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
     pygame.display.flip()
 
