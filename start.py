@@ -14,6 +14,7 @@ Score = 0
 WINDOWSIZE = (576, 250)
 SwitchColorON = (153, 153, 0)
 SwitchColorOFF = (123,123,123)
+RainbowColorEffect = (0,0,0)
 r = g = b = 0
 screen = pygame.display.set_mode(WINDOWSIZE)
 pygame.display.set_caption("Binary Counting")
@@ -52,13 +53,13 @@ class SwitchPlate(pygame.sprite.Sprite):
 def RenderScreen():
     global CongratFlag, MyRandomNumber, Score, MAXRANDOM
     global RainbowColorEffect
-    RainbowColorEffect = GetRainbowEffect()
-
     screen.blit(background, (0, 0))
+
     # Render Text
     CurrentBinarySum = str(GetBits(SwitchPlates))
     TextBinarySum = font.render(CurrentBinarySum, 1, RainbowColorEffect)
     if CongratFlag != True:
+        RainbowColorEffect = GetRainbowEffect()
         if int(CurrentBinarySum) > MyRandomNumber:
             TextHint = font.render("Too High.", 1, RainbowColorEffect)
         elif int(CurrentBinarySum) < MyRandomNumber:
@@ -84,12 +85,6 @@ def RenderScreen():
 def GetRainbowEffect():
     global c_color, n_color, frames
     c_color = AnimatedRainbow.FadingRainbow(c_color, n_color, frames) # get next color
-
-    frames -= 1
-    if frames == 0: # translation complete
-        frames = AnimatedRainbow.FADE_SPEED
-        n_color = AnimatedRainbow.cycle.next() # get next color
-
     return map(int, c_color)
 
 def TurnAllSwitchPlatesOff(plates):
@@ -164,4 +159,8 @@ while True:
                 sys.exit(0)
 
     #Rendering
+    frames -= 1
+    if frames == 0: # translation complete
+        frames = AnimatedRainbow.FADE_SPEED
+        n_color = AnimatedRainbow.cycle.next() # get next color
     RenderScreen()

@@ -12,7 +12,7 @@ B = (0, 0, 255)
 I = (75, 0, 130)
 V = (143, 0, 255)
 
-FADE_SPEED = 80 # no of frames for shifting
+FADE_SPEED = 320 # no of frames for shifting
 colors = (R, O, Y, G, B, I, V) # to allow you to iterate over the colors
 cycle = itertools.cycle(colors)
 
