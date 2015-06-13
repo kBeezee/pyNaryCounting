@@ -9,10 +9,11 @@ import random
 pygame.init()
 clock = pygame.time.Clock()
 
-MyRandomNumber = random.randrange(1, 1024)
 CongratFlag = False
 Score = 0
-WINDOWSIZE = (576, 125)
+WINDOWSIZE = (576, 250)
+SwitchColorON = (153, 153, 0)
+SwitchColorOFF = (123,123,123)
 screen = pygame.display.set_mode(WINDOWSIZE)
 pygame.display.set_caption("Binary Counting")
 
@@ -32,9 +33,9 @@ class SwitchPlate(pygame.sprite.Sprite):
 
     def update(self):
         if self.state == 0:
-            self.color = (123,123,123)
+            self.color = SwitchColorOFF
         else:
-            self.color = (0, 250, 125)
+            self.color = SwitchColorON
         pygame.draw.rect(screen, self.color, self.rect)
         xfont = pygame.font.Font(None, 18)
         label = xfont.render(str(self.BitNumber), 1, (255,255,0))
@@ -46,6 +47,32 @@ class SwitchPlate(pygame.sprite.Sprite):
         else:
             self.state = 1
 
+def RenderScreen():
+    global CongratFlag, MyRandomNumber, Score, MAXRANDOM
+    screen.blit(background, (0, 0))
+    # Render Text
+    CurrentBinarySum = str(GetBits(SwitchPlates))
+    TextBinarySum = font.render(CurrentBinarySum, 1, (255,255,0))
+    if CongratFlag != True:
+        if int(CurrentBinarySum) > MyRandomNumber:
+            TextHint = font.render("Too High.", 1, (255,255,0))
+        elif int(CurrentBinarySum) < MyRandomNumber:
+            TextHint = font.render("Too Low.", 1, (255,255,0))
+        elif int(CurrentBinarySum) == MyRandomNumber:
+            TextHint = font.render("You Win!", 1, (255,255,0))
+            MyRandomNumber = random.randrange(1, MAXRANDOM+1)
+            TurnAllSwitchPlatesOff(SwitchPlates)
+            Score += 1
+            CongratFlag = True
+
+        #Switchplates
+        SwitchPlates.update()
+        TextScore = font.render("Score: " + str(Score), 1, (255,255,0))
+        #Image transfer
+        screen.blit(TextBinarySum, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
+        screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
+        screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
+        pygame.display.flip()
 
 def TurnAllSwitchPlatesOff(plates):
     for p in plates:
@@ -66,19 +93,27 @@ dTop = 10
 dWidth = 50
 dHeight = 75
 vLeft = dLeft
+vTop = dTop
 
 bNum = 1
-for row in xrange(1, 11):
-    NewRect = SwitchPlate((123,123,123), vLeft, dTop, dWidth, dHeight, bNum)
-    SwitchPlates.add(NewRect)
-    bNum *= 2
-    vLeft = vLeft + dWidth + cSpacing
-
+for col in xrange(1, 3):
+    for row in xrange(1, 11):
+        NewRect = SwitchPlate(SwitchColorOFF, vLeft, vTop, dWidth, dHeight, bNum)
+        SwitchPlates.add(NewRect)
+        bNum *= 2
+        vLeft = vLeft + dWidth + cSpacing
+    vLeft = dLeft
+    vTop = vTop + dHeight + (cSpacing * 3)
 
 # Fill background
 background = pygame.Surface(screen.get_size())
 background = background.convert()
 background.fill((0, 0, 0))
+
+MAXRANDOM = 0
+for p in SwitchPlates:
+    MAXRANDOM += p.BitNumber
+MyRandomNumber = random.randrange(1, MAXRANDOM+1)
 
 while True:
     for event in pygame.event.get():
@@ -99,30 +134,4 @@ while True:
                 pygame.quit()
                 sys.exit(0)
 
-    screen.blit(background, (0, 0))
-
-    # Render Text
-    CurrentBinarySum = str(GetBits(SwitchPlates))
-    TextBinarySum = font.render(CurrentBinarySum, 1, (255,255,0))
-    if CongratFlag != True:
-        if int(CurrentBinarySum) > MyRandomNumber:
-            TextHint = font.render("Too High.", 1, (255,255,0))
-        elif int(CurrentBinarySum) < MyRandomNumber:
-            TextHint = font.render("Too Low.", 1, (255,255,0))
-        elif int(CurrentBinarySum) == MyRandomNumber:
-            TextHint = font.render("You Win!", 1, (255,255,0))
-            MyRandomNumber = random.randrange(1, 1024)
-            TurnAllSwitchPlatesOff(SwitchPlates)
-            Score += 1
-            CongratFlag = True
-
-
-    #Switchplates
-    SwitchPlates.update()
-    TextScore = font.render("Score: " + str(Score), 1, (255,255,0))
-    #Image transfer
-    screen.blit(TextBinarySum, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
-    screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
-    screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
-    pygame.display.flip()
-
+    RenderScreen()
