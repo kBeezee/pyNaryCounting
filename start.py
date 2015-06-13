@@ -72,6 +72,7 @@ def RenderScreen():
         screen.blit(TextBinarySum, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
         screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
         screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
+        pygame.draw.line(screen, (255,255,0), (0, WINDOWSIZE[1] - 25), (WINDOWSIZE[0], WINDOWSIZE[1]-25))
         pygame.display.flip()
 
 def TurnAllSwitchPlatesOff(plates):
@@ -114,7 +115,7 @@ MAXRANDOM = 0
 for p in SwitchPlates:
     MAXRANDOM += p.BitNumber
 MyRandomNumber = random.randrange(1, MAXRANDOM+1)
-
+#1048575
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
