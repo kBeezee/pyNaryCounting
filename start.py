@@ -2,9 +2,9 @@
 
 import pygame
 import sys
-import math
+#import math
 import random
-
+import AnimatedRainbow
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -14,6 +14,7 @@ Score = 0
 WINDOWSIZE = (576, 250)
 SwitchColorON = (153, 153, 0)
 SwitchColorOFF = (123,123,123)
+r = g = b = 0
 screen = pygame.display.set_mode(WINDOWSIZE)
 pygame.display.set_caption("Binary Counting")
 
@@ -32,13 +33,14 @@ class SwitchPlate(pygame.sprite.Sprite):
         self.rect = pygame.Rect((left, top, width, height))
 
     def update(self):
+        global RainbowColorEffect
         if self.state == 0:
             self.color = SwitchColorOFF
         else:
-            self.color = SwitchColorON
+            self.color = RainbowColorEffect
         pygame.draw.rect(screen, self.color, self.rect)
         xfont = pygame.font.Font(None, 18)
-        label = xfont.render(str(self.BitNumber), 1, (255,255,0))
+        label = xfont.render(str(self.BitNumber), 1, RainbowColorEffect)
         screen.blit(label, self.rect.bottomleft)
 
     def click(self):
@@ -49,17 +51,20 @@ class SwitchPlate(pygame.sprite.Sprite):
 
 def RenderScreen():
     global CongratFlag, MyRandomNumber, Score, MAXRANDOM
+    global RainbowColorEffect
+    RainbowColorEffect = GetRainbowEffect()
+
     screen.blit(background, (0, 0))
     # Render Text
     CurrentBinarySum = str(GetBits(SwitchPlates))
-    TextBinarySum = font.render(CurrentBinarySum, 1, (255,255,0))
+    TextBinarySum = font.render(CurrentBinarySum, 1, RainbowColorEffect)
     if CongratFlag != True:
         if int(CurrentBinarySum) > MyRandomNumber:
-            TextHint = font.render("Too High.", 1, (255,255,0))
+            TextHint = font.render("Too High.", 1, RainbowColorEffect)
         elif int(CurrentBinarySum) < MyRandomNumber:
-            TextHint = font.render("Too Low.", 1, (255,255,0))
+            TextHint = font.render("Too Low.", 1, RainbowColorEffect)
         elif int(CurrentBinarySum) == MyRandomNumber:
-            TextHint = font.render("You Win!", 1, (255,255,0))
+            TextHint = font.render("You Win!", 1, RainbowColorEffect)
             MyRandomNumber = random.randrange(1, MAXRANDOM+1)
             TurnAllSwitchPlatesOff(SwitchPlates)
             Score += 1
@@ -67,13 +72,25 @@ def RenderScreen():
 
         #Switchplates
         SwitchPlates.update()
-        TextScore = font.render("Score: " + str(Score), 1, (255,255,0))
+        TextScore = font.render("Score: " + str(Score), 1, RainbowColorEffect)
         #Image transfer
         screen.blit(TextBinarySum, (WINDOWSIZE[0]/2, WINDOWSIZE[1]-21))
         screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
         screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
-        pygame.draw.line(screen, (255,255,0), (0, WINDOWSIZE[1] - 25), (WINDOWSIZE[0], WINDOWSIZE[1]-25))
+
+        pygame.draw.line(screen, RainbowColorEffect, (0, WINDOWSIZE[1] - 25), (WINDOWSIZE[0], WINDOWSIZE[1]-25))
         pygame.display.flip()
+
+def GetRainbowEffect():
+    global c_color, n_color, frames
+    c_color = AnimatedRainbow.FadingRainbow(c_color, n_color, frames) # get next color
+
+    frames -= 1
+    if frames == 0: # translation complete
+        frames = AnimatedRainbow.FADE_SPEED
+        n_color = AnimatedRainbow.cycle.next() # get next color
+
+    return map(int, c_color)
 
 def TurnAllSwitchPlatesOff(plates):
     for p in plates:
@@ -88,6 +105,7 @@ def GetBits(plates):
 
 SwitchPlate.groups = SwitchPlates
 
+#build switches
 cSpacing = 7
 dLeft = 7
 dTop = 10
@@ -106,17 +124,28 @@ for col in xrange(1, 3):
     vLeft = dLeft
     vTop = vTop + dHeight + (cSpacing * 3)
 
+
 # Fill background
 background = pygame.Surface(screen.get_size())
 background = background.convert()
 background.fill((0, 0, 0))
 
+
+#get the max random number dynamically
 MAXRANDOM = 0
 for p in SwitchPlates:
     MAXRANDOM += p.BitNumber
 MyRandomNumber = random.randrange(1, MAXRANDOM+1)
-#1048575
+
+
+#precode for rainbow effects
+c_color = AnimatedRainbow.cycle.next() # RED    current_color
+n_color = AnimatedRainbow.cycle.next() # BLACK  next_color
+frames = AnimatedRainbow.FADE_SPEED
+## --------------
+
 while True:
+    #Event Handleing
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -128,11 +157,11 @@ while True:
                     CongratFlag = False
                     sp.click()
 
-
         if event.type == pygame.KEYDOWN:
             pressedkeys = pygame.key.get_pressed()
             if pressedkeys[pygame.K_ESCAPE]:
                 pygame.quit()
                 sys.exit(0)
 
+    #Rendering
     RenderScreen()
