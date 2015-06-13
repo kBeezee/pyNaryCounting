@@ -13,7 +13,7 @@ CongratFlag = False
 Score = 0
 WINDOWSIZE = (576, 250)
 SwitchColorON = (153, 153, 0)
-SwitchColorOFF = (123,123,123)
+SwitchColorOFF = (20,20,20)
 RainbowColorEffect = (0,0,0)
 r = g = b = 0
 screen = pygame.display.set_mode(WINDOWSIZE)
@@ -55,10 +55,11 @@ def RenderScreen():
     global RainbowColorEffect
     screen.blit(background, (0, 0))
 
-    # Render Text
+
     CurrentBinarySum = str(GetBits(SwitchPlates))
     TextBinarySum = font.render(CurrentBinarySum, 1, RainbowColorEffect)
     if CongratFlag != True:
+        # Render Text
         RainbowColorEffect = GetRainbowEffect()
         if int(CurrentBinarySum) > MyRandomNumber:
             TextHint = font.render("Too High.", 1, RainbowColorEffect)
@@ -71,7 +72,7 @@ def RenderScreen():
             Score += 1
             CongratFlag = True
 
-        #Switchplates
+        #Render Switchplates
         SwitchPlates.update()
         TextScore = font.render("Score: " + str(Score), 1, RainbowColorEffect)
         #Image transfer
@@ -79,7 +80,9 @@ def RenderScreen():
         screen.blit(TextHint, (25, WINDOWSIZE[1]-21))
         screen.blit(TextScore, (WINDOWSIZE[0]-100, WINDOWSIZE[1]-21))
 
+        #render dividor
         pygame.draw.line(screen, RainbowColorEffect, (0, WINDOWSIZE[1] - 25), (WINDOWSIZE[0], WINDOWSIZE[1]-25))
+        #apply
         pygame.display.flip()
 
 def GetRainbowEffect():
