@@ -11,7 +11,7 @@ clock = pygame.time.Clock()
 
 CongratFlag = False
 Score = 0
-WINDOWSIZE = (576, 250)
+WINDOWSIZE = (1024, 250)
 SwitchColorON = (153, 153, 0)
 SwitchColorOFF = (20,20,20)
 RainbowColorEffect = (0,0,0)
@@ -54,8 +54,6 @@ def RenderScreen():
     global CongratFlag, MyRandomNumber, Score, MAXRANDOM
     global RainbowColorEffect
     screen.blit(background, (0, 0))
-
-
     CurrentBinarySum = str(GetBits(SwitchPlates))
     TextBinarySum = font.render(CurrentBinarySum, 1, RainbowColorEffect)
     if CongratFlag != True:
@@ -104,16 +102,17 @@ def GetBits(plates):
 SwitchPlate.groups = SwitchPlates
 
 #build switches
+rows = 3
 cSpacing = 7
 dLeft = 7
 dTop = 10
-dWidth = 50
-dHeight = 75
+dWidth = (WINDOWSIZE[0] - 75) / 10
+dHeight = (WINDOWSIZE[1] - 25) / rows
 vLeft = dLeft
 vTop = dTop
 
 bNum = 1
-for col in xrange(1, 3):
+for col in xrange(1, rows):
     for row in xrange(1, 11):
         NewRect = SwitchPlate(SwitchColorOFF, vLeft, vTop, dWidth, dHeight, bNum)
         SwitchPlates.add(NewRect)
@@ -134,6 +133,7 @@ MAXRANDOM = 0
 for p in SwitchPlates:
     MAXRANDOM += p.BitNumber
 MyRandomNumber = random.randrange(1, MAXRANDOM+1)
+MyRandomNumber = 0
 
 
 #precode for rainbow effects
@@ -158,13 +158,15 @@ while i < 20:
 
 
 while True:
+    MyRandomNumber += 1
+
     #Event Handleing
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            MyRandomNumber = random.randrange(1, MAXRANDOM+1)
+            MyRandomNumber += 1
             for sp in SwitchPlates:
                 myMouse = pygame.mouse.get_pos()
                 if sp.rect.collidepoint(myMouse[0], myMouse[1]):
@@ -173,9 +175,10 @@ while True:
 
         if event.type == pygame.KEYDOWN:
             pressedkeys = pygame.key.get_pressed()
-            if pressedkeys[pygame.K_ESCAPE]:
-                pygame.quit()
-                sys.exit(0)
+            if pressedkeys:
+                if pressedkeys[pygame.K_ESCAPE]:
+                    pygame.quit()
+                    sys.exit(0)
 
     MyBinary = '{0:020b}'.format(MyRandomNumber)[::-1]
     #print MyBinary
